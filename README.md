@@ -38,10 +38,10 @@
 ## Tech Stack
 
 - Flutter & Dart - Cross-platform application development 
-- Provider - State management |
+- Provider - State management 
 - Firebase Authentication - Donor, orphanage, and admin authentication 
 - Cloud Firestore - Cloud database for app records 
 - Firebase Admin SDK - Assigning admin custom claims from a trusted environment 
 - Google Fonts & Font Awesome - UI typography and icons
 
-** Project Notes** Firestore Security Rules still require hardening before public deployment. This repository should be treated as a development/portfolio project, not a production-ready donation platform. Do not use real sensitive user or donation data until authorization rules have been reviewed and secured.
+>**Project Notes** Firestore Security Rules still require hardening before public deployment. This repository should be treated as a development/portfolio project, not a production-ready donation platform. Do not use real sensitive user or donation data until authorization rules have been reviewed and secured.
