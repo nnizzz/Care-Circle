@@ -4,6 +4,7 @@ import 'package:care_circle/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class adminlogin extends StatefulWidget {
   const adminlogin({super.key});
@@ -19,9 +20,6 @@ class _adminloginState extends State<adminlogin> {
   bool obscurePassword = true;
   bool isLoading = false;
 
-  final String presetEmail = 'admin@carecircle.com';
-  final String presetPassword = 'admin123';
-
   @override
   void dispose() {
     adminEmail.dispose();
@@ -29,50 +27,69 @@ class _adminloginState extends State<adminlogin> {
     super.dispose();
   }
 
-  Future<void> loginAdmin() async {
-    if (adminEmail.text.trim().isEmpty || adminPassword.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Fields must not be empty!'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+  
+Future<void> loginAdmin() async {
+  if (adminEmail.text.trim().isEmpty ||
+      adminPassword.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Fields must not be empty!'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  setState(() => isLoading = true);
+
+  try {
+    final credential =
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: adminEmail.text.trim(),
+      password: adminPassword.text.trim(),
+    );
+
+    final token = await credential.user!.getIdTokenResult(true);
+
+    if (token.claims?['admin'] != true) {
+      await FirebaseAuth.instance.signOut();
+      throw Exception('You do not have admin access.');
     }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
 
-    final email = adminEmail.text.trim();
-    final password = adminPassword.text.trim();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const adminnavigation(),
+      ),
+      (route) => false,
+    );
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
 
-    if (email == presetEmail && password == presetPassword) {
-      setState(() {
-        isLoading = false;
-      });
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const adminnavigation()),
-        (route) => false,
-      );
-    } else {
-      setState(() {
-        isLoading = false;
-      });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.message ?? 'Admin login failed.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid Admin Email or Password!'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString().replaceFirst('Exception: ', '')),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => isLoading = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

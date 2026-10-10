@@ -57,3 +57,8 @@ lib-carecircle.zip
 android/key.properties
 serviceAccountKey.json
 *service-account*.json
+
+# Firebase Admin SDK
+firebase_admin_setup/node_modules/
+firebase_admin_setup/*.json
+firebase_admin_setup/*.pem

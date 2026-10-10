@@ -1,5 +1,6 @@
 import 'package:care_circle/auth/login_page.dart';
 import 'package:care_circle/theme/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -61,15 +62,28 @@ class adminprofile extends StatelessWidget {
 
   if (confirm != true) return;
 
+try {
+  await FirebaseAuth.instance.signOut();
+
   if (!context.mounted) return;
 
   Navigator.pushAndRemoveUntil(
     context,
     MaterialPageRoute(
-      builder: (context) =>  loginpage(),
+      builder: (context) => const loginpage(),
     ),
     (route) => false,
   );
+} on FirebaseAuthException catch (e) {
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(e.message ?? 'Failed to logout.'),
+      backgroundColor: Colors.red,
+    ),
+  );
+}
 }
 
   @override
